@@ -16,11 +16,14 @@ import com.example.controllogistico.ui.theme.ControllogisticoTheme
 import com.example.controllogistico.view.CrearSolicitudScreen
 import com.example.controllogistico.view.HomeScreen
 import com.example.controllogistico.view.InventarioScreen
+import com.example.controllogistico.view.ProcesarSolicitudScreen
 import com.example.controllogistico.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModels {
+        MainViewModel.provideFactory(application)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,16 +46,23 @@ fun AppNavigation(mainViewModel: MainViewModel) {
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             HomeScreen(
-                repository = mainViewModel.getRepository(),
+                viewModel = mainViewModel.homeViewModel,
                 onNavigateToInventario = { navController.navigate("inventario") },
-                onNavigateToNuevaSolicitud = { navController.navigate("nueva_solicitud") }
+                onNavigateToCrearSolicitud = { navController.navigate("crear_solicitud") },
+                onNavigateToProcesarSolicitudes = { navController.navigate("procesar_solicitudes") }
             )
         }
         composable("inventario") {
             InventarioScreen(viewModel = mainViewModel.inventarioViewModel)
         }
-        composable("nueva_solicitud") {
-            CrearSolicitudScreen(viewModel = mainViewModel.crearSolicitudViewModel)
+        composable("crear_solicitud") {
+             CrearSolicitudScreen(
+                viewModel = mainViewModel.crearSolicitudViewModel,
+                onSolicitudEnviada = { navController.popBackStack() }
+            )
+        }
+        composable("procesar_solicitudes") {
+            ProcesarSolicitudScreen(viewModel = mainViewModel.procesarSolicitudViewModel)
         }
     }
 }

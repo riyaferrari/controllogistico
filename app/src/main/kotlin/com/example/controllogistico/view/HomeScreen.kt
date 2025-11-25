@@ -15,71 +15,90 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.controllogistico.repository.InventarioRepository
+import com.example.controllogistico.viewmodel.HomeViewModel
+import com.example.controllogistico.viewmodel.KpiUiState
 
 @Composable
 fun HomeScreen(
-    repository: InventarioRepository,
+    viewModel: HomeViewModel,
     onNavigateToInventario: () -> Unit,
-    onNavigateToNuevaSolicitud: () -> Unit
+    onNavigateToCrearSolicitud: () -> Unit,
+    onNavigateToProcesarSolicitudes: () -> Unit
 ) {
-    val materiales by repository.materiales.collectAsState()
-    val materialesEnAlertaRoja = materiales.count { it.stockDisponible <= it.minStock }
+    val kpiState by viewModel.kpiState.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.SpaceAround
     ) {
-        KpiWidget(materialesEnAlertaRoja)
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = onNavigateToInventario,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-        ) {
-            Text("Ver Inventario", fontSize = 18.sp)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Dashboard de Logística", style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.height(32.dp))
+            KpiRow(kpiState = kpiState)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = onNavigateToNuevaSolicitud,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-        ) {
-            Text("Nueva Solicitud", fontSize = 18.sp)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = onNavigateToCrearSolicitud,
+                modifier = Modifier.fillMaxWidth().height(50.dp)
+            ) {
+                Text("Crear Nueva Solicitud (Ing.)")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onNavigateToProcesarSolicitudes,
+                modifier = Modifier.fillMaxWidth().height(50.dp)
+            ) {
+                Text("Procesar Solicitudes (Log.)")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onNavigateToInventario,
+                modifier = Modifier.fillMaxWidth().height(50.dp)
+            ) {
+                Text("Gestionar Inventario")
+            }
         }
     }
 }
 
 @Composable
-fun KpiWidget(count: Int) {
-    Card(
+fun KpiRow(kpiState: KpiUiState) {
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        KpiCard(label = "Valor Inventario", value = "$${"%,.2f".format(kpiState.valorInventario)}")
+        KpiCard(label = "Solicitudes Pend.", value = "${kpiState.solicitudesPendientes}", isAlert = kpiState.solicitudesPendientes > 0)
+        KpiCard(label = "Alertas Stock", value = "${kpiState.alertasStockBajo}", isAlert = kpiState.alertasStockBajo > 0)
+    }
+}
+
+@Composable
+fun KpiCard(label: String, value: String, isAlert: Boolean = false) {
+    Card(
+        modifier = Modifier.size(width = 110.dp, height = 100.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isAlert) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            Text(text = label, style = MaterialTheme.typography.labelSmall)
             Text(
-                "Materiales en Alerta Roja:",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Text(
-                text = "$count",
-                fontSize = 48.sp,
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = if (count > 0) Color.Red else Color.Unspecified
+                color = if (isAlert) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }

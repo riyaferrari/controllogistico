@@ -9,13 +9,13 @@ import kotlinx.coroutines.launch
 
 class CrearSolicitudViewModel(private val repository: InventarioRepository) : ViewModel() {
 
-    val proyectos = repository.proyectos
-    val materiales = repository.materiales
+    val proyectos = repository.getProyectos().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val materiales = repository.getMateriales().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val _proyectoSeleccionado = MutableStateFlow<Proyecto?>(null)
     val proyectoSeleccionado = _proyectoSeleccionado.asStateFlow()
 
-    private val _itemsSolicitud = MutableStateFlow<List<DetalleSolicitud>>(emptyList())
+    private val _itemsSolicitud = MutableStateFlow<Map<String, DetalleSolicitud>>(emptyMap())
     val itemsSolicitud = _itemsSolicitud.asStateFlow()
 
     fun onProyectoSeleccionado(proyecto: Proyecto) {
@@ -23,46 +23,44 @@ class CrearSolicitudViewModel(private val repository: InventarioRepository) : Vi
     }
 
     fun onMaterialAgregado(sku: String, cantidad: Int) {
-        val nuevoItem = DetalleSolicitud(
-            skuMaterial = sku,
-            cantidadSolicitada = cantidad,
-            cantidadAutorizada = cantidad, // Por defecto, la autorizada es igual a la solicitada
-            cantidadSurtida = 0
-        )
-        _itemsSolicitud.update { currentList ->
-            val existingItem = currentList.find { it.skuMaterial == sku }
+        _itemsSolicitud.update { currentMap ->
+            val newMap = currentMap.toMutableMap()
+            val existingItem = newMap[sku]
             if (existingItem != null) {
-                // Si el item ya existe, actualiza la cantidad
-                currentList.map {
-                    if (it.skuMaterial == sku) {
-                        it.copy(cantidadSolicitada = it.cantidadSolicitada + cantidad)
-                    } else {
-                        it
-                    }
-                }
+                newMap[sku] = existingItem.copy(cantidadSolicitada = existingItem.cantidadSolicitada + cantidad)
             } else {
-                // Si no existe, lo añade
-                currentList + nuevoItem
+                newMap[sku] = DetalleSolicitud(
+                    solicitudId = "", // Se asignará al crear la solicitud
+                    skuMaterial = sku,
+                    cantidadSolicitada = cantidad,
+                    cantidadAutorizada = cantidad,
+                    cantidadSurtida = 0
+                )
             }
+            newMap
         }
     }
 
-    fun onEnviarSolicitud() {
+    fun onEnviarSolicitud(onSuccess: () -> Unit) {
         viewModelScope.launch {
             val proyecto = _proyectoSeleccionado.value ?: return@launch
-            val items = _itemsSolicitud.value
+            val items = _itemsSolicitud.value.values.toList()
             if (items.isNotEmpty()) {
-                val nuevaSolicitud = SolicitudMaterial(
-                    id = "SOL-${System.currentTimeMillis()}",
+                val solicitudId = "SOL-${System.currentTimeMillis()}"
+                val nuevaSolicitud = Solicitud(
+                    id = solicitudId,
                     proyectoId = proyecto.id,
                     fecha = System.currentTimeMillis(),
                     estado = EstadoSolicitud.PENDIENTE_APROBACION,
-                    items = items
                 )
-                repository.addSolicitud(nuevaSolicitud)
-                // Limpiar formulario después de enviar
+                val detallesConId = items.map { it.copy(solicitudId = solicitudId) }
+
+                repository.crearNuevaSolicitud(nuevaSolicitud, detallesConId)
+
+                // Limpiar formulario y notificar
                 _proyectoSeleccionado.value = null
-                _itemsSolicitud.value = emptyList()
+                _itemsSolicitud.value = emptyMap()
+                onSuccess()
             }
         }
     }

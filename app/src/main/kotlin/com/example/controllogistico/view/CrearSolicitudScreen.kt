@@ -14,10 +14,10 @@ import com.example.controllogistico.viewmodel.CrearSolicitudViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel) {
+fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel, onSolicitudEnviada: () -> Unit) {
     val proyectos by viewModel.proyectos.collectAsState()
     val proyectoSeleccionado by viewModel.proyectoSeleccionado.collectAsState()
-    val itemsSolicitud by viewModel.itemsSolicitud.collectAsState()
+    val itemsSolicitudMap by viewModel.itemsSolicitud.collectAsState()
     val materiales by viewModel.materiales.collectAsState()
 
     var showDialog by remember { mutableStateOf(false) }
@@ -36,14 +36,14 @@ fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = { showDialog = true }, enabled = proyectoSeleccionado != null) {
-            Text("Agregar Material")
+            Text("Agregar Material al Carrito")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Materiales Solicitados:", style = MaterialTheme.typography.titleMedium)
+        Text("Carrito de Solicitud:", style = MaterialTheme.typography.titleMedium)
         LazyColumn(modifier = Modifier.weight(1f)) {
-            items(itemsSolicitud) { item ->
+            items(itemsSolicitudMap.values.toList()) { item ->
                 val material = materiales.find { it.sku == item.skuMaterial }
                 Text("${material?.nombre ?: "Desconocido"} - Cantidad: ${item.cantidadSolicitada}")
             }
@@ -52,8 +52,8 @@ fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = viewModel::onEnviarSolicitud,
-            enabled = itemsSolicitud.isNotEmpty(),
+            onClick = { viewModel.onEnviarSolicitud(onSolicitudEnviada) },
+            enabled = itemsSolicitudMap.isNotEmpty(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Enviar Solicitud")
@@ -109,6 +109,7 @@ fun ProyectoSelector(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgregarMaterialDialog(
     materiales: List<Material>,
@@ -123,7 +124,6 @@ fun AgregarMaterialDialog(
         title = { Text("Agregar Material") },
         text = {
             Column {
-                // Dropdown para seleccionar material (simplificado, para un caso real usar un buscador)
                 var expanded by remember { mutableStateOf(false) }
                 ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded}) {
                      TextField(
@@ -150,7 +150,7 @@ fun AgregarMaterialDialog(
 
                 TextField(
                     value = cantidad,
-                    onValueChange = { cantidad = it },
+                    onValue-Change = { cantidad = it },
                     label = { Text("Cantidad") }
                 )
             }
