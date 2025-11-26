@@ -18,7 +18,7 @@ import com.example.controllogistico.viewmodel.CrearSolicitudViewModel
 @Composable
 fun CrearSolicitudScreen(
     viewModel: CrearSolicitudViewModel,
-    onSolicitudEnviada: () -> Unit // <-- PARÁMETRO CORREGIDO
+    onSolicitudEnviada: () -> Unit
 ) {
     val proyectos by viewModel.proyectos.collectAsState()
     val proyectoSeleccionado by viewModel.proyectoSeleccionado.collectAsState()
@@ -59,7 +59,6 @@ fun CrearSolicitudScreen(
             }
 
             Button(
-                // CORRECCIÓN: Llamar al ViewModel pasando el callback onSolicitudEnviada
                 onClick = { viewModel.onEnviarSolicitud(onSuccess = onSolicitudEnviada) },
                 enabled = carrito.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
@@ -71,7 +70,10 @@ fun CrearSolicitudScreen(
                 AgregarMaterialDialog(
                     materiales = materiales.filter { it.stockDisponible > 0 },
                     onDismiss = { showDialog = false },
-                    onMaterialAdd = viewModel::agregarAlCarrito
+                    onMaterialAdd = { sku, qty ->
+                        viewModel.agregarAlCarrito(sku, qty)
+                        showDialog = false
+                    }
                 )
             }
         }
@@ -103,4 +105,87 @@ fun CarritoItemCard(
         }
     }
 }
-// El resto de composables (ProyectoSelector, AgregarMaterialDialog) se mantienen igual.
+
+// --- DEFINICIONES DE COMPOSABLES AUXILIARES ---
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProyectoSelector(
+    proyectos: List<Proyecto>,
+    proyectoSeleccionado: Proyecto?,
+    onProyectoSelected: (Proyecto) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+        TextField(
+            value = proyectoSeleccionado?.nombre ?: "Seleccione un Proyecto",
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor().fillMaxWidth()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            proyectos.forEach { proyecto ->
+                DropdownMenuItem(
+                    text = { Text(proyecto.nombre) },
+                    onClick = {
+                        onProyectoSelected(proyecto)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AgregarMaterialDialog(
+    materiales: List<Material>,
+    onDismiss: () -> Unit,
+    onMaterialAdd: (String, Int) -> Unit
+) {
+    var selectedMaterialSku by remember { mutableStateOf(materiales.firstOrNull()?.sku ?: "") }
+    var cantidad by remember { mutableStateOf("1") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Agregar Material") },
+        text = {
+            Column {
+                var expanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded}) {
+                     TextField(
+                        value = materiales.find{it.sku == selectedMaterialSku}?.nombre ?: "Seleccionar material",
+                        onValueChange = {}, readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        materiales.forEach { material ->
+                            DropdownMenuItem(
+                                text = { Text(material.nombre) },
+                                onClick = {
+                                    selectedMaterialSku = material.sku
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(value = cantidad, onValueChange = { cantidad = it }, label = { Text("Cantidad") })
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                val cantidadInt = cantidad.toIntOrNull() ?: 1
+                if (selectedMaterialSku.isNotBlank()) {
+                    onMaterialAdd(selectedMaterialSku, cantidadInt)
+                }
+            }) { Text("Agregar") }
+        },
+        dismissButton = { Button(onClick = onDismiss) { Text("Cancelar") } }
+    )
+}
