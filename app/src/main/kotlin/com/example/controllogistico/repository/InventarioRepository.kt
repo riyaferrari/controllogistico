@@ -2,6 +2,8 @@ package com.example.controllogistico.repository
 
 import android.content.Context
 import com.example.controllogistico.model.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 
 class InventarioRepository(private val context: Context) {
@@ -11,6 +13,7 @@ class InventarioRepository(private val context: Context) {
     private val solicitudDao: SolicitudDao
 
     init {
+        // La CoroutineScope aquí es necesaria para la inicialización de la base de datos
         val database = AppDatabase.getDatabase(context, CoroutineScope(Dispatchers.IO))
         materialDao = database.materialDao()
         proyectoDao = database.proyectoDao()
