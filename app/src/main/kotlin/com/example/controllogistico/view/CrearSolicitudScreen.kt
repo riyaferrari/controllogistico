@@ -11,6 +11,7 @@ import com.example.controllogistico.model.Material
 import com.example.controllogistico.model.Proyecto
 import com.example.controllogistico.viewmodel.CrearSolicitudViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel, onSolicitudEnviada: () -> Unit) {
     val proyectos by viewModel.proyectos.collectAsState()

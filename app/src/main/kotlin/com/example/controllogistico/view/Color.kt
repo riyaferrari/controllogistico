@@ -1,4 +1,4 @@
-package com.example.controllogistico.ui.theme
+package com.example.controllogistico.view
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)

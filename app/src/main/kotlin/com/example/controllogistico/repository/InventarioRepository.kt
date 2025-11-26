@@ -1,13 +1,21 @@
 package com.example.controllogistico.repository
 
+import android.content.Context
 import com.example.controllogistico.model.*
 import kotlinx.coroutines.flow.Flow
 
-class InventarioRepository(
-    private val materialDao: MaterialDao,
-    private val proyectoDao: ProyectoDao,
+class InventarioRepository(private val context: Context) {
+
+    private val materialDao: MaterialDao
+    private val proyectoDao: ProyectoDao
     private val solicitudDao: SolicitudDao
-) {
+
+    init {
+        val database = AppDatabase.getDatabase(context, CoroutineScope(Dispatchers.IO))
+        materialDao = database.materialDao()
+        proyectoDao = database.proyectoDao()
+        solicitudDao = database.solicitudDao()
+    }
 
     // --- Flujos de Datos ---
     fun getMateriales(): Flow<List<Material>> = materialDao.getAll()
