@@ -14,13 +14,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.controllogistico.model.AppDatabase
 import com.example.controllogistico.repository.InventarioRepository
 import com.example.controllogistico.view.*
 import com.example.controllogistico.viewmodel.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -29,20 +25,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val database = AppDatabase.getDatabase(applicationContext, CoroutineScope(Dispatchers.IO))
-        repository = InventarioRepository(
-            database.materialDao(),
-            database.proyectoDao(),
-            database.solicitudDao()
-        )
-
-        CoroutineScope(Dispatchers.IO).launch {
-            if (database.materialDao().count() == 0) {
-                 val seeder = com.example.controllogistico.model.DatabaseSeeder()
-                 database.materialDao().insertAll(seeder.getInitialMaterials())
-                 database.proyectoDao().insertAll(seeder.getInitialProyectos())
-            }
-        }
+        // Inicialización simplificada del repositorio.
+        // El repositorio ahora se encarga internamente de obtener la base de datos.
+        // El seeder es llamado automáticamente por el callback de Room en la creación de la DB.
+        repository = InventarioRepository(applicationContext)
 
         setContent {
             ControllogisticoTheme {
@@ -57,6 +43,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation(repository: InventarioRepository) {
     val navController = rememberNavController()
+    // La factory ahora recibe el repositorio ya instanciado.
     val factory = ViewModelFactory(repository)
 
     NavHost(navController = navController, startDestination = "home") {
