@@ -20,34 +20,36 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {
+        fun getDatabase(context: Context, scope: CoroutineScope): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "control_logistico_database"
                 )
-                .addCallback(DatabaseSeeder())
+                .addCallback(DatabaseSeederCallback(scope))
                 .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
-}
 
-private class DatabaseSeeder : RoomDatabase.Callback() {
-    override fun onCreate(db: SupportSQLiteDatabase) {
-        super.onCreate(db)
-        // Usamos un CoroutineScope para lanzar la operación de seeder en un hilo de fondo
-        CoroutineScope(Dispatchers.IO).launch {
-            // Aquí iría la lógica para obtener la instancia de la base de datos y los DAOs
-            // Sin embargo, como el callback no tiene acceso directo a la instancia de la DB,
-            // esta lógica se manejaría mejor en la inicialización, fuera del callback.
-            // Para este MVP, dejaremos el seeder como una función a llamar desde el ViewModel principal.
+    private class DatabaseSeederCallback(private val scope: CoroutineScope) : RoomDatabase.Callback() {
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            super.onCreate(db)
+            INSTANCE?.let { database ->
+                scope.launch {
+                    val seeder = DatabaseSeeder()
+                    database.materialDao().insertAll(seeder.getInitialMaterials())
+                    database.proyectoDao().insertAll(seeder.getInitialProyectos())
+                }
+            }
         }
     }
+}
 
+class DatabaseSeeder {
     fun getInitialMaterials(): List<Material> {
         return listOf(
             Material("SKU-001", "Fibra Óptica 10m", "Fibra", 100, 10, 20, 150.75, "A1-1", false),
@@ -60,7 +62,6 @@ private class DatabaseSeeder : RoomDatabase.Callback() {
             Material("SKU-008", "Cinchos de Plástico", "Fijación", 1000, 100, 200, 0.10, "B2-4", true),
             Material("SKU-009", "Taquetes 1/4", "Fijación", 800, 50, 150, 0.05, "B2-5", true),
             Material("SKU-010", "Switch 8 Puertos", "Equipos", 40, 5, 8, 45.50, "C1-6", false),
-            // ... agregar 10 materiales más
             Material("SKU-011", "Grapas para Cable", "Fijación", 2000, 200, 500, 0.02, "B2-6", true),
             Material("SKU-012", "Servidor Básico", "Equipos", 10, 1, 3, 1200.0, "C2-1", false),
             Material("SKU-013", "Patch Panel 24p", "Cableado", 25, 3, 5, 75.0, "A2-1", false),

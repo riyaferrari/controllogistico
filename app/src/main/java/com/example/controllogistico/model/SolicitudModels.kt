@@ -43,6 +43,6 @@ enum class EstadoSolicitud {
 
 enum class EstadoItemSolicitud {
     PENDIENTE,
-    FALTANTE, // Backorder
+    FALTANTE,
     SURTIDO
 }

@@ -2,7 +2,6 @@ package com.example.controllogistico.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.controllogistico.model.Material
 import com.example.controllogistico.repository.InventarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -10,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
-class InventarioViewModel(private val repository: InventarioRepository) : ViewModel() {
+class InventarioViewModel(repository: InventarioRepository) : ViewModel() {
 
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()

@@ -30,7 +30,7 @@ class CrearSolicitudViewModel(private val repository: InventarioRepository) : Vi
                 newMap[sku] = existingItem.copy(cantidadSolicitada = existingItem.cantidadSolicitada + cantidad)
             } else {
                 newMap[sku] = DetalleSolicitud(
-                    solicitudId = "", // Se asignará al crear la solicitud
+                    solicitudId = "",
                     skuMaterial = sku,
                     cantidadSolicitada = cantidad,
                     cantidadAutorizada = cantidad,
@@ -57,7 +57,6 @@ class CrearSolicitudViewModel(private val repository: InventarioRepository) : Vi
 
                 repository.crearNuevaSolicitud(nuevaSolicitud, detallesConId)
 
-                // Limpiar formulario y notificar
                 _proyectoSeleccionado.value = null
                 _itemsSolicitud.value = emptyMap()
                 onSuccess()

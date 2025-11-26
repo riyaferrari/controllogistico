@@ -7,12 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.controllogistico.model.DetalleSolicitud
 import com.example.controllogistico.model.Material
 import com.example.controllogistico.model.Proyecto
 import com.example.controllogistico.viewmodel.CrearSolicitudViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel, onSolicitudEnviada: () -> Unit) {
     val proyectos by viewModel.proyectos.collectAsState()
@@ -22,25 +20,17 @@ fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel, onSolicitudEnviada:
 
     var showDialog by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         ProyectoSelector(
             proyectos = proyectos,
             proyectoSeleccionado = proyectoSeleccionado,
             onProyectoSelected = viewModel::onProyectoSeleccionado
         )
-
         Spacer(modifier = Modifier.height(16.dp))
-
         Button(onClick = { showDialog = true }, enabled = proyectoSeleccionado != null) {
             Text("Agregar Material al Carrito")
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
         Text("Carrito de Solicitud:", style = MaterialTheme.typography.titleMedium)
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(itemsSolicitudMap.values.toList()) { item ->
@@ -48,9 +38,7 @@ fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel, onSolicitudEnviada:
                 Text("${material?.nombre ?: "Desconocido"} - Cantidad: ${item.cantidadSolicitada}")
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
         Button(
             onClick = { viewModel.onEnviarSolicitud(onSolicitudEnviada) },
             enabled = itemsSolicitudMap.isNotEmpty(),
@@ -61,7 +49,7 @@ fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel, onSolicitudEnviada:
 
         if (showDialog) {
             AgregarMaterialDialog(
-                materiales = materiales,
+                materiales = materiales.filter { it.stockDisponible > 0 },
                 onDismiss = { showDialog = false },
                 onMaterialAdd = { sku, cantidad ->
                     viewModel.onMaterialAgregado(sku, cantidad)
@@ -81,10 +69,7 @@ fun ProyectoSelector(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
-    ) {
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
         TextField(
             value = proyectoSeleccionado?.nombre ?: "Seleccione un Proyecto",
             onValueChange = {},
@@ -92,10 +77,7 @@ fun ProyectoSelector(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor().fillMaxWidth()
         )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             proyectos.forEach { proyecto ->
                 DropdownMenuItem(
                     text = { Text(proyecto.nombre) },
@@ -128,8 +110,7 @@ fun AgregarMaterialDialog(
                 ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded}) {
                      TextField(
                         value = materiales.find{it.sku == selectedMaterialSku}?.nombre ?: "Seleccionar material",
-                        onValueChange = {},
-                        readOnly = true,
+                        onValueChange = {}, readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier.menuAnchor().fillMaxWidth()
                     )
@@ -145,14 +126,8 @@ fun AgregarMaterialDialog(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
-
-                TextField(
-                    value = cantidad,
-                    onValue-Change = { cantidad = it },
-                    label = { Text("Cantidad") }
-                )
+                TextField(value = cantidad, onValueChange = { cantidad = it }, label = { Text("Cantidad") })
             }
         },
         confirmButton = {
@@ -161,14 +136,8 @@ fun AgregarMaterialDialog(
                 if (selectedMaterialSku.isNotBlank()) {
                     onMaterialAdd(selectedMaterialSku, cantidadInt)
                 }
-            }) {
-                Text("Agregar")
-            }
+            }) { Text("Agregar") }
         },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
+        dismissButton = { Button(onClick = onDismiss) { Text("Cancelar") } }
     )
 }

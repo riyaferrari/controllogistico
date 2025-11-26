@@ -22,11 +22,7 @@ fun InventarioScreen(viewModel: InventarioViewModel) {
     val searchText by viewModel.searchText.collectAsState()
     val materiales by viewModel.materialesVisibles.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         TextField(
             value = searchText,
             onValueChange = viewModel::onSearchTextChange,
@@ -34,9 +30,7 @@ fun InventarioScreen(viewModel: InventarioViewModel) {
             label = { Text("Buscar por Nombre o SKU") }
         )
         Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(materiales) { material ->
                 MaterialCard(material = material)
             }
@@ -47,27 +41,22 @@ fun InventarioScreen(viewModel: InventarioViewModel) {
 @Composable
 fun MaterialCard(material: Material) {
     val stockColor = when {
-        material.stockDisponible <= material.minStock -> Color.Red
-        material.stockDisponible <= material.minStock * 1.1 -> Color(0xFFFFA500) // Orange
+        material.stockDisponible < material.minStock -> Color.Red
+        material.stockDisponible < material.minStock * 1.2 -> Color(0xFFFFA500) // Orange
         else -> Color.Green
     }
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(2.dp, stockColor, CardDefaults.shape),
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = Modifier.fillMaxWidth().border(2.dp, stockColor, CardDefaults.shape),
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = material.nombre, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(text = "SKU: ${material.sku}", fontSize = 14.sp, color = Color.Gray)
+                Text(text = "SKU: ${material.sku} | Ubic: ${material.ubicacion}", fontSize = 14.sp, color = Color.Gray)
             }
             Text(
                 text = "${material.stockDisponible}",
