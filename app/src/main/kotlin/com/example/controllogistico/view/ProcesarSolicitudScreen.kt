@@ -39,8 +39,8 @@ fun ProcesarSolicitudScreen(
             solicitud = solicitudSeleccionada!!,
             onProcesar = {
                 viewModel.procesarSolicitud(it.solicitud.id)
-                solicitudSeleccionada = null // Oculta el detalle
-                onSolicitudProcesada() // Navega hacia atrás
+                solicitudSeleccionada = null
+                onSolicitudProcesada()
             },
             onBack = { solicitudSeleccionada = null }
         )
@@ -73,7 +73,6 @@ fun DetalleSolicitudScreen(
         Text("Detalle de Solicitud", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         Text("ID: ${solicitud.solicitud.id}", style = MaterialTheme.typography.bodyMedium)
-        // Aquí se mostraría una lista detallada de los ítems...
         Spacer(modifier = Modifier.height(16.dp))
         Row {
             Button(onClick = { onProcesar(solicitud) }) {
