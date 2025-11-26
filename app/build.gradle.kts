@@ -65,6 +65,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
+    // CORRECCIÓN: Añadir dependencia explícita para iconos extendidos
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+
     // Room
     implementation("androidx.room:room-runtime:2.6.0")
     implementation("androidx.room:room-ktx:2.6.0")

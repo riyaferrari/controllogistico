@@ -1,7 +1,6 @@
 package com.example.controllogistico.view
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,14 +10,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.controllogistico.viewmodel.MisSolicitudesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MisSolicitudesScreen(
-    viewModel: MisSolicitudesViewModel,
-    navController: NavController
+    viewModel: MisSolicitudesViewModel
 ) {
     val solicitudes by viewModel.todasLasSolicitudes.collectAsState(emptyList())
 

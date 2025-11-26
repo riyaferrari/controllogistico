@@ -5,14 +5,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.controllogistico.viewmodel.AgregarMaterialViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgregarMaterialScreen(
     viewModel: AgregarMaterialViewModel,
-    navController: NavController
+    onBack: () -> Unit
 ) {
     var sku by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
@@ -49,10 +48,9 @@ fun AgregarMaterialScreen(
                         minStock = minStock.toIntOrNull() ?: 0,
                         precio = precio.toDoubleOrNull() ?: 0.0,
                         ubicacion = ubicacion,
-                        esConsumible = esConsumible
-                    ) {
-                        navController.popBackStack()
-                    }
+                        esConsumible = esConsumible,
+                        onSuccess = onBack
+                    )
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
