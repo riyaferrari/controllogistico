@@ -13,7 +13,6 @@ class InventarioRepository(private val context: Context) {
     private val solicitudDao: SolicitudDao
 
     init {
-        // La CoroutineScope aquí es necesaria para la inicialización de la base de datos
         val database = AppDatabase.getDatabase(context, CoroutineScope(Dispatchers.IO))
         materialDao = database.materialDao()
         proyectoDao = database.proyectoDao()
@@ -23,11 +22,17 @@ class InventarioRepository(private val context: Context) {
     // --- Flujos de Datos ---
     fun getMateriales(): Flow<List<Material>> = materialDao.getAll()
     fun getProyectos(): Flow<List<Proyecto>> = proyectoDao.getAll()
+    fun getProyectoConSolicitudes(proyectoId: String): Flow<ProyectoConSolicitudes> =
+        proyectoDao.getProyectoConSolicitudes(proyectoId)
+    fun getAllSolicitudes(): Flow<List<SolicitudConDetalles>> = solicitudDao.getAllSolicitudesConDetalles()
     fun getSolicitudesPendientes(): Flow<List<SolicitudConDetalles>> =
         solicitudDao.getSolicitudesPorEstado(EstadoSolicitud.PENDIENTE_APROBACION)
 
+    // --- Lógica de Negocio ---
+    suspend fun agregarMaterial(material: Material) {
+        materialDao.insert(material)
+    }
 
-    // --- Lógica de Negocio Crítica ("Smart Stock") ---
     suspend fun crearNuevaSolicitud(solicitud: Solicitud, detalles: List<DetalleSolicitud>) {
         solicitudDao.insertSolicitud(solicitud)
         solicitudDao.insertDetalles(detalles)

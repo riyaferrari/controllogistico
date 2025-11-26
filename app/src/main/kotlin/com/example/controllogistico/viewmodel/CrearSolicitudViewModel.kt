@@ -15,37 +15,47 @@ class CrearSolicitudViewModel(private val repository: InventarioRepository) : Vi
     private val _proyectoSeleccionado = MutableStateFlow<Proyecto?>(null)
     val proyectoSeleccionado = _proyectoSeleccionado.asStateFlow()
 
-    private val _itemsSolicitud = MutableStateFlow<Map<String, DetalleSolicitud>>(emptyMap())
-    val itemsSolicitud = _itemsSolicitud.asStateFlow()
+    // Carrito Temporal
+    private val _carrito = MutableStateFlow<Map<String, Int>>(emptyMap()) // Map<SKU, Cantidad>
+    val carrito: StateFlow<Map<String, Int>> = _carrito.asStateFlow()
 
     fun onProyectoSeleccionado(proyecto: Proyecto) {
         _proyectoSeleccionado.value = proyecto
     }
 
-    fun onMaterialAgregado(sku: String, cantidad: Int) {
-        _itemsSolicitud.update { currentMap ->
-            val newMap = currentMap.toMutableMap()
-            val existingItem = newMap[sku]
-            if (existingItem != null) {
-                newMap[sku] = existingItem.copy(cantidadSolicitada = existingItem.cantidadSolicitada + cantidad)
-            } else {
-                newMap[sku] = DetalleSolicitud(
-                    solicitudId = "",
-                    skuMaterial = sku,
-                    cantidadSolicitada = cantidad,
-                    cantidadAutorizada = cantidad,
-                    cantidadSurtida = 0
-                )
+    fun agregarAlCarrito(sku: String, cantidad: Int) {
+        _carrito.update { currentCart ->
+            val newCart = currentCart.toMutableMap()
+            newCart[sku] = (newCart[sku] ?: 0) + cantidad
+            newCart
+        }
+    }
+
+    fun editarCantidad(sku: String, nuevaCantidad: Int) {
+        if (nuevaCantidad <= 0) {
+            eliminarDelCarrito(sku)
+        } else {
+            _carrito.update { currentCart ->
+                val newCart = currentCart.toMutableMap()
+                newCart[sku] = nuevaCantidad
+                newCart
             }
-            newMap
+        }
+    }
+
+    fun eliminarDelCarrito(sku: String) {
+        _carrito.update { currentCart ->
+            val newCart = currentCart.toMutableMap()
+            newCart.remove(sku)
+            newCart
         }
     }
 
     fun onEnviarSolicitud(onSuccess: () -> Unit) {
         viewModelScope.launch {
             val proyecto = _proyectoSeleccionado.value ?: return@launch
-            val items = _itemsSolicitud.value.values.toList()
-            if (items.isNotEmpty()) {
+            val itemsCarrito = _carrito.value
+            if (itemsCarrito.isNotEmpty()) {
                 val solicitudId = "SOL-${System.currentTimeMillis()}"
                 val nuevaSolicitud = Solicitud(
                     id = solicitudId,
@@ -53,12 +63,21 @@ class CrearSolicitudViewModel(private val repository: InventarioRepository) : Vi
                     fecha = System.currentTimeMillis(),
                     estado = EstadoSolicitud.PENDIENTE_APROBACION,
                 )
-                val detallesConId = items.map { it.copy(solicitudId = solicitudId) }
+                val detalles = itemsCarrito.map { (sku, cantidad) ->
+                    DetalleSolicitud(
+                        solicitudId = solicitudId,
+                        skuMaterial = sku,
+                        cantidadSolicitada = cantidad,
+                        cantidadAutorizada = cantidad, // Por defecto, se autoriza lo mismo
+                        cantidadSurtida = 0
+                    )
+                }
 
-                repository.crearNuevaSolicitud(nuevaSolicitud, detallesConId)
+                repository.crearNuevaSolicitud(nuevaSolicitud, detalles)
 
+                // Limpiar y notificar
                 _proyectoSeleccionado.value = null
-                _itemsSolicitud.value = emptyMap()
+                _carrito.value = emptyMap()
                 onSuccess()
             }
         }

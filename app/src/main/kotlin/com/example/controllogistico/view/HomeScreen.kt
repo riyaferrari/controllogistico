@@ -14,10 +14,7 @@ import com.example.controllogistico.viewmodel.KpiUiState
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel,
-    onNavigateToInventario: () -> Unit,
-    onNavigateToCrearSolicitud: () -> Unit,
-    onNavigateToProcesarSolicitudes: () -> Unit
+    viewModel: HomeViewModel
 ) {
     val kpiState by viewModel.kpiState.collectAsState()
 
@@ -26,23 +23,10 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround
     ) {
         Text("Dashboard de Logística", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(32.dp))
         KpiRow(kpiState = kpiState)
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = onNavigateToCrearSolicitud, modifier = Modifier.fillMaxWidth()) {
-                Text("Crear Nueva Solicitud (Ing.)")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = onNavigateToProcesarSolicitudes, modifier = Modifier.fillMaxWidth()) {
-                Text("Procesar Solicitudes (Log.)")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = onNavigateToInventario, modifier = Modifier.fillMaxWidth()) {
-                Text("Gestionar Inventario")
-            }
-        }
     }
 }
 
@@ -60,7 +44,7 @@ fun KpiRow(kpiState: KpiUiState) {
 
 @Composable
 fun KpiCard(label: String, value: String, isAlert: Boolean = false) {
-    Card(
+    ElevatedCard(
         modifier = Modifier.size(width = 110.dp, height = 90.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isAlert) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
