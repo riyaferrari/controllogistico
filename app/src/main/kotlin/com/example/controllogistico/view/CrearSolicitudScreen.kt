@@ -10,14 +10,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.controllogistico.model.Material
 import com.example.controllogistico.model.Proyecto
 import com.example.controllogistico.viewmodel.CrearSolicitudViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel, navController: NavController) {
+fun CrearSolicitudScreen(
+    viewModel: CrearSolicitudViewModel,
+    onSolicitudEnviada: () -> Unit // <-- PARÁMETRO CORREGIDO
+) {
     val proyectos by viewModel.proyectos.collectAsState()
     val proyectoSeleccionado by viewModel.proyectoSeleccionado.collectAsState()
     val carrito by viewModel.carrito.collectAsState()
@@ -57,7 +59,8 @@ fun CrearSolicitudScreen(viewModel: CrearSolicitudViewModel, navController: NavC
             }
 
             Button(
-                onClick = { viewModel.onEnviarSolicitud { navController.popBackStack() } },
+                // CORRECCIÓN: Llamar al ViewModel pasando el callback onSolicitudEnviada
+                onClick = { viewModel.onEnviarSolicitud(onSuccess = onSolicitudEnviada) },
                 enabled = carrito.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -100,4 +103,4 @@ fun CarritoItemCard(
         }
     }
 }
-// El resto de composables (ProyectoSelector, AgregarMaterialDialog) se mantienen
+// El resto de composables (ProyectoSelector, AgregarMaterialDialog) se mantienen igual.
