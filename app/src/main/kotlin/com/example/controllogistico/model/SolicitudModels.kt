@@ -5,14 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
-// --- Entidades Principales ---
-
-@Entity(tableName = "proyectos")
-data class Proyecto(
-    @PrimaryKey val id: String,
-    val nombre: String,
-    val lider: String
-)
+// --- Entidades de Solicitud ---
 
 @Entity(tableName = "solicitudes")
 data class Solicitud(
@@ -33,7 +26,8 @@ data class DetalleSolicitud(
     var estadoItem: EstadoItemSolicitud = EstadoItemSolicitud.PENDIENTE
 )
 
-// --- Clases de Relación para Consultas ---
+
+// --- Clases de Relación ---
 
 data class SolicitudConDetalles(
     @Embedded val solicitud: Solicitud,
