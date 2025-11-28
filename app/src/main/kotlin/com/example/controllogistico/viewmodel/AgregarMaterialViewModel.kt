@@ -20,7 +20,6 @@ class AgregarMaterialViewModel(private val repository: InventarioRepository) : V
         onSuccess: () -> Unit
     ) {
         if (sku.isBlank() || nombre.isBlank() || categoria.isBlank()) {
-            // Manejar error de validación
             return
         }
 
@@ -36,6 +35,7 @@ class AgregarMaterialViewModel(private val repository: InventarioRepository) : V
                 ubicacion = ubicacion,
                 esConsumible = esConsumible
             )
+            // CORRECCIÓN: Llamar a la función del repositorio.
             repository.agregarMaterial(nuevoMaterial)
             onSuccess()
         }

@@ -1,6 +1,6 @@
 package com.example.controllogistico.repository
 
-import android.content.Context
+import android.content{Context}
 import com.example.controllogistico.model.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,13 +24,14 @@ class InventarioRepository(private val context: Context) {
     fun getProyectos(): Flow<List<Proyecto>> = proyectoDao.getAll()
     fun getProyectoConSolicitudes(proyectoId: String): Flow<ProyectoConSolicitudes> =
         proyectoDao.getProyectoConSolicitudes(proyectoId)
-    fun getAllSolicitudes(): Flow<List<SolicitudConDetalles>> = solicitudDao.getAllSolicitudesConDetalles()
+    fun getAllSolicitudesConDetalles(): Flow<List<SolicitudConDetalles>> = solicitudDao.getAllSolicitudesConDetalles()
     fun getSolicitudesPendientes(): Flow<List<SolicitudConDetalles>> =
         solicitudDao.getSolicitudesPorEstado(EstadoSolicitud.PENDIENTE_APROBACION)
 
     // --- Lógica de Negocio ---
     suspend fun agregarMaterial(material: Material) {
-        materialDao.insert(material)
+        // CORRECCIÓN: Usar insertAll como se solicitó.
+        materialDao.insertAll(listOf(material))
     }
 
     suspend fun crearNuevaSolicitud(solicitud: Solicitud, detalles: List<DetalleSolicitud>) {

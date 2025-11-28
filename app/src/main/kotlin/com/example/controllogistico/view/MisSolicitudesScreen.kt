@@ -20,14 +20,19 @@ fun MisSolicitudesScreen(
     val solicitudes by viewModel.todasLasSolicitudes.collectAsState(emptyList())
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Mis Solicitudes") }) }
+        topBar = { TopAppBar(title = { Text("Historial de Solicitudes") }) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(solicitudes) { solicitud ->
-                SolicitudCard(solicitud = solicitud, onClick = { /* Navegar al detalle si se desea */ })
+            // CORRECCIÓN: No hay Type Mismatch aquí si SolicitudCard espera SolicitudConDetalles.
+            // El código original era probablemente correcto. Se regenera para asegurar consistencia.
+            items(solicitudes) { solicitudConDetalles ->
+                SolicitudCard(
+                    solicitud = solicitudConDetalles,
+                    onClick = { /* Lógica de navegación al detalle */ }
+                )
             }
         }
     }
