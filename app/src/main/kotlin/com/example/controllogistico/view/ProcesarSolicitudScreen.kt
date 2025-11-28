@@ -14,6 +14,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Pantalla principal para el personal de logística.
+ * Muestra una lista de solicitudes pendientes y permite ver el detalle para procesarlas.
+ */
 @Composable
 fun ProcesarSolicitudScreen(
     viewModel: ProcesarSolicitudViewModel,
@@ -47,6 +51,9 @@ fun ProcesarSolicitudScreen(
     }
 }
 
+/**
+ * Composable que muestra una tarjeta con el resumen de una solicitud.
+ */
 @Composable
 fun SolicitudCard(solicitud: SolicitudConDetalles, onClick: (SolicitudConDetalles) -> Unit) {
     Card(
@@ -63,6 +70,9 @@ fun SolicitudCard(solicitud: SolicitudConDetalles, onClick: (SolicitudConDetalle
     }
 }
 
+/**
+ * Pantalla que muestra el detalle de una solicitud y permite al usuario procesarla.
+ */
 @Composable
 fun DetalleSolicitudScreen(
     solicitud: SolicitudConDetalles,
@@ -73,6 +83,7 @@ fun DetalleSolicitudScreen(
         Text("Detalle de Solicitud", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         Text("ID: ${solicitud.solicitud.id}", style = MaterialTheme.typography.bodyMedium)
+        // Aquí se mostraría una lista detallada de los ítems.
         Spacer(modifier = Modifier.height(16.dp))
         Row {
             Button(onClick = { onProcesar(solicitud) }) {

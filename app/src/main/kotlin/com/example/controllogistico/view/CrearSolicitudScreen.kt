@@ -14,6 +14,10 @@ import com.example.controllogistico.model.Material
 import com.example.controllogistico.model.Proyecto
 import com.example.controllogistico.viewmodel.CrearSolicitudViewModel
 
+/**
+ * Pantalla principal para la creación de una nueva solicitud de material.
+ * Funciona como un "carrito de compras".
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearSolicitudScreen(
@@ -80,6 +84,9 @@ fun CrearSolicitudScreen(
     }
 }
 
+/**
+ * Muestra una tarjeta para un ítem dentro del carrito de compras.
+ */
 @Composable
 fun CarritoItemCard(
     material: Material,
@@ -108,6 +115,9 @@ fun CarritoItemCard(
 
 // --- DEFINICIONES DE COMPOSABLES AUXILIARES ---
 
+/**
+ * Composable para mostrar un menú desplegable de selección de proyectos.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProyectoSelector(
@@ -139,6 +149,9 @@ fun ProyectoSelector(
     }
 }
 
+/**
+ * Diálogo para buscar y agregar un material al carrito de la solicitud.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgregarMaterialDialog(
