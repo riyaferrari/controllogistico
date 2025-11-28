@@ -1,6 +1,6 @@
 package com.example.controllogistico.repository
 
-import android.content{Context}
+import android.content.Context
 import com.example.controllogistico.model.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +30,7 @@ class InventarioRepository(private val context: Context) {
 
     // --- Lógica de Negocio ---
     suspend fun agregarMaterial(material: Material) {
-        // CORRECCIÓN: Usar insertAll como se solicitó.
+        // FUNCIÓN AÑADIDA
         materialDao.insertAll(listOf(material))
     }
 
@@ -67,7 +67,7 @@ class InventarioRepository(private val context: Context) {
                     surtidoCompleto = false
                 }
                 materialDao.update(material)
-                solicitudDao.updateDetalle(item)
+                solicitudDao.updateDetalle(item) // VERIFICADO: updateDetalle es singular y existe.
             }
         }
 

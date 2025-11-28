@@ -6,9 +6,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MaterialDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(material: Material)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(materiales: List<Material>)
 
     @Update
@@ -32,6 +29,7 @@ interface ProyectoDao {
     @Query("SELECT * FROM proyectos")
     fun getAll(): Flow<List<Proyecto>>
 
+    // MÉTODO AÑADIDO
     @Transaction
     @Query("SELECT * FROM proyectos WHERE id = :proyectoId")
     fun getProyectoConSolicitudes(proyectoId: String): Flow<ProyectoConSolicitudes>
@@ -51,6 +49,7 @@ interface SolicitudDao {
     @Update
     suspend fun updateDetalle(detalle: DetalleSolicitud)
 
+    // MÉTODO AÑADIDO
     @Transaction
     @Query("SELECT * FROM solicitudes")
     fun getAllSolicitudesConDetalles(): Flow<List<SolicitudConDetalles>>
